@@ -1,20 +1,69 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { NavigationContainer } from "@react-navigation/native"
+import { createStackNavigator } from "@react-navigation/stack"
+import React, { useState, useEffect } from "react"
+import { firebase } from "./config"
+import Login from "./src/screens/Login"
+import Registration from "./src/screens/Registration"
+import Dashboard from "./src/screens/Dashboard"
+import Header from "./src/components/Header"
 
-export default function App() {
+const Stack = createStackNavigator()
+
+function App() {
+  const [initializing, setInitializing] = useState(true)
+  const [user, setUser] = useState()
+
+  function onAuthStateChanged(user) {
+    setUser(user)
+    if (initializing) {
+      setInitializing(false)
+    }
+  }
+
+  useEffect(() => {
+    const subscriber = firebase.auth().onAuthStateChanged(onAuthStateChanged)
+    return subscriber
+  }, [])
+
+  if (initializing) return null
+
+  if (!user) {
+    return (
+      <Stack.Navigator>
+        <Stack.Screen
+          name="Login"
+          component={Login}
+          options={{
+            headerTitle: () => <Header name="Login" />,
+          }}
+        />
+        <Stack.Screen
+          name="Registration"
+          component={Registration}
+          options={{
+            headerTitle: () => <Header name="Registration" />,
+          }}
+        />
+      </Stack.Navigator>
+    )
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+    <Stack.Navigator>
+      <Stack.Screen
+        name="Dashboard"
+        component={Dashboard}
+        options={{
+          headerTitle: () => <Header name="Dashboard" />,
+        }}
+      />
+    </Stack.Navigator>
+  )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default () => {
+  return (
+    <NavigationContainer>
+      <App />
+    </NavigationContainer>
+  )
+}
