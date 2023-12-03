@@ -7,3 +7,5 @@
 
 #3. I have invited you guys onto the Firebase project so any changes can be seen in the FireStore db
 
+#4. I guess we can push to our own branches and then merge with main?
+
