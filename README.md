@@ -1,5 +1,5 @@
 # MadDeals_2.0_REACT
-New Repo for MadDeals
+# New Repo for MadDeals
 
 #1. In order to use, just run 'npm start' in the terminal while in the project directory, and install Expo on your phone, then scan the QR code given by the terminal and you should see how the app looks!
 
