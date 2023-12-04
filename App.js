@@ -37,7 +37,7 @@ function App() {
             name="Login"
             component={Login}
             options={{
-              tabBarVisible: false, // Hide tab bar for the Login screen
+              tabBarVisible: false,
               tabBarIcon: ({ focused, color, size }) => (
                 <Ionicons
                   name={focused ? "ios-person" : "ios-person-outline"}
@@ -51,7 +51,7 @@ function App() {
             name="Registration"
             component={Registration}
             options={{
-              tabBarVisible: false, // Hide tab bar for the Registration screen
+              tabBarVisible: false,
               tabBarIcon: ({ focused, color, size }) => (
                 <Ionicons
                   name={focused ? "ios-person" : "ios-person-outline"}
