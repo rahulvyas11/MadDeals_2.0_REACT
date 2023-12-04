@@ -58,12 +58,6 @@ const Registration = () => {
     getPermissions()
   }, [])
 
-  const geocode = async () => {
-    const geocodedLocation = await Location.geocodeAsync(address)
-    console.log("Geocode Address:")
-    console.log(geocodedLocation)
-  }
-
   return (
     <View style={styles.container}>
       <Text style={{ fontSize: 36, marginBottom: 10 }}>
