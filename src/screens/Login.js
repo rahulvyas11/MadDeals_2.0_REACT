@@ -13,12 +13,18 @@ const Login = () => {
   const navigation = useNavigation()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [entryError, setEntryError] = useState("")
 
   loginUser = async (email, user) => {
+    if (!email || !password) {
+      setEntryError("Error: You must provide an email and password")
+      return
+    }
+
     try {
       await firebase.auth().signInWithEmailAndPassword(email, password)
     } catch (error) {
-      alert(error.message)
+      setEntryError("Error: Invalid email or password")
     }
   }
 
@@ -38,11 +44,12 @@ const Login = () => {
         onChangeText={(text) => setPassword(text)}
         secureTextEntry={true}
       />
+      {entryError ? <Text style={styles.errorText}>{entryError}</Text> : null}
       <TouchableOpacity
         onPress={() => loginUser(email, password)}
         style={styles.loginButton}
       >
-        <Text style={styles.buttonText}>Login</Text>
+        <Text style={[styles.buttonText, { color: "#EAF5EC" }]}>Login</Text>
       </TouchableOpacity>
 
       <Text style={styles.newHere}>New Here?</Text>
@@ -51,7 +58,7 @@ const Login = () => {
         style={styles.signUpButton}
         onPress={() => navigation.navigate("Registration")}
       >
-        <Text style={styles.buttonText}>Sign Up</Text>
+        <Text style={[styles.buttonText, { color: "#1C251E" }]}>Sign Up</Text>
       </TouchableOpacity>
     </View>
   )
@@ -78,8 +85,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   loginButton: {
+    borderRadius: 5,
     marginTop: 5,
-    backgroundColor: "crimson",
+    backgroundColor: "#1C251E",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
@@ -88,7 +96,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   signUpButton: {
-    backgroundColor: "grey",
+    backgroundColor: "#EAF5EC",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
@@ -107,6 +115,7 @@ const styles = StyleSheet.create({
     width: 200,
     borderColor: "gray",
     borderWidth: 1,
+    borderRadius: 8,
     marginBottom: 16,
     marginTop: 16,
     paddingHorizontal: 10,

@@ -20,8 +20,14 @@ const Registration = () => {
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [location, setLocation] = useState()
+  const [entryError, setEntryError] = useState("")
 
   registerUser = async (email, password, firstName, lastName, location) => {
+    if (!email || !password || !firstName || !lastName) {
+      setEntryError("Error: Please fill in all fields!")
+      return
+    }
+
     await firebase
       .auth()
       .createUserWithEmailAndPassword(email, password)
@@ -38,7 +44,8 @@ const Registration = () => {
           })
       })
       .catch((error) => {
-        alert(error.message)
+        setEntryError("Please provide a valid email!")
+        return
       })
   }
 
@@ -79,30 +86,39 @@ const Registration = () => {
       <TextInput
         style={styles.input}
         placeholder="Email"
-        onChangeText={(text) => setEmail(text)}
+        onChangeText={(text) => {
+          setEmail(text)
+          setEntryError("")
+        }}
         keyboardType="email-address"
       />
       <Text style={styles.inputName}>Password</Text>
       <TextInput
         style={styles.input}
         placeholder="Password"
-        onChangeText={(text) => setPassword(text)}
+        onChangeText={(text) => {
+          setPassword(text)
+          setEntryError("")
+        }}
         secureTextEntry={true}
       />
+      {entryError ? <Text style={styles.errorText}>{entryError}</Text> : null}
       <TouchableOpacity
         style={styles.signUpButton}
         onPress={() =>
           registerUser(email, password, firstName, lastName, location)
         }
       >
-        <Text style={styles.buttonText}>Signup</Text>
+        <Text style={[styles.buttonText, { color: "#EAF5EC" }]}>Signup</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.neverMind}
         onPress={() => navigation.navigate("Login")}
       >
-        <Text style={styles.buttonText}>Nevermind!</Text>
+        <Text style={[styles.buttonText, { color: "#1C251E" }]}>
+          Nevermind!
+        </Text>
       </TouchableOpacity>
     </View>
   )
@@ -131,27 +147,29 @@ const styles = StyleSheet.create({
     width: 200,
     borderColor: "gray",
     borderWidth: 1,
+    borderRadius: 8,
     marginBottom: 16,
     marginTop: 16,
     paddingHorizontal: 10,
   },
   inputName: {
     fontSize: 16,
-    marginTop: 5,
-    marginBottom: 5,
+    marginBottom: 1,
   },
   signUpButton: {
-    backgroundColor: "crimson",
+    borderRadius: 5,
+    marginTop: 5,
+    backgroundColor: "#1C251E",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
     borderWidth: 1,
     borderColor: "#ddd",
     elevation: 5,
-    marginBottom: 20,
   },
   neverMind: {
-    backgroundColor: "grey",
+    marginTop: 10,
+    backgroundColor: "#EAF5EC",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,

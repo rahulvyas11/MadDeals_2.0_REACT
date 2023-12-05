@@ -5,37 +5,79 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Image,
-  ScrollView
+  ScrollView,
+  TextInput
 } from "react-native"
 import { useState, useEffect } from "react"
 import { firebase } from "../../config"
 import React from "react"
 import { useNavigation } from "@react-navigation/native"
+import * as Location from "expo-location"
+import { Feather } from "@expo/vector-icons"
+
 
 const Dashboard = () => {
   const navigation = useNavigation()
   const [name, setName] = useState("")
+  const [user, setUser] = useState("")
+  const [street, setStreet] = useState("")
+  const [pCode, setPcode] = useState("")
+  const [address, setAddress] = useState("")
+
+  const updateLocation = async () => {
+    const geocodeLocation = await Location.geocodeAsync(address)
+  }
 
   useEffect(() => {
-    firebase
-      .firestore()
-      .collection("users")
-      .doc(firebase.auth().currentUser.uid)
-      .get()
-      .then((snapshot) => {
-        if (snapshot.exists) {
-          setName(snapshot.data())
+    const fetchData = async () => {
+      try {
+        const userSnapshot = await firebase
+          .firestore()
+          .collection("users")
+          .doc(firebase.auth().currentUser.uid)
+          .get()
+
+        if (userSnapshot.exists) {
+          const userData = userSnapshot.data()
+          setUser(userData)
+
+          const reverseGeocodedAddress = await Location.reverseGeocodeAsync({
+            longitude: userData.location.coords.longitude,
+            latitude: userData.location.coords.latitude,
+          })
+
+          const { name, postalCode } = reverseGeocodedAddress[0]
+          setStreet(name)
+          setPcode(postalCode)
         } else {
           console.log("User Does Not Exist")
         }
-      })
+      } catch (error) {
+        console.error("Error fetching data:", error)
+      }
+    }
+
+    fetchData()
   }, [])
+
   return (
     <View style={styles.container}>
+      <Text style={{ fontSize: 26 }}>Hello, {user.firstName}</Text>
+      <View style={styles.locationContainer}>
+        <Feather style={{ margin: 3 }} name="map-pin" size={20} color="blue" />
+        <TextInput
+          style={{
+            fontSize: 18,
+            padding: 10,
+          }}
+          placeholder={`${street}, ${pCode}`}
+          onChangeText={setAddress}
+        />
+        <Feather style={{ margin: 3 }} name="search" size={20} color="black" />
+      </View>
       <ScrollView>
-        <Text style={{ fontSize: 26, fontWeight: "bold" }}>Hello, {name.firstName}</Text>
-        <Text style = {{fontWeight: "bold"}}>Today's Pick</Text>
-        <View style = {{padding: 20 }}>
+        <Text style={{ fontWeight: "bold" }}>Today's Pick</Text>
+        <View style={{ padding: 20 }}>
           <TouchableOpacity
             onPress={() => navigation.navigate("Restaurant")}
           >
@@ -187,6 +229,20 @@ const Dashboard = () => {
 
         </View>
       </ScrollView>
+      {/* <Text style={{ fontSize: 26 }}>Hello, {user.firstName}</Text>
+        <View style={styles.locationContainer}>
+          <Feather style={{ margin: 3 }} name="map-pin" size={20} color="blue" />
+          <TextInput
+            style={{
+              fontSize: 18,
+              padding: 10,
+            }}
+            placeholder={`${street}, ${pCode}`}
+            onChangeText={setAddress}
+          />
+          <Feather style={{ margin: 3 }} name="search" size={20} color="black" />
+        </View> */}
+
     </View>
   )
 }
@@ -198,6 +254,18 @@ const styles = StyleSheet.create({
     // alignItems: "center",
     justifyContent: "flex-start", // Updated to "flex-start" to align content at the top
     paddingTop: 20, // Optional: Add padding from the top if needed
+    alignItems: "center",
+    justifyContent: "flex-start",
+    paddingTop: 20,
+  },
+  locationContainer: {
+    borderWidth: 1,
+    borderRadius: 5,
+    flexDirection: "row",
+    alignItems: "center",
+    width: 325,
+    marginTop: 10,
   },
 })
+
 export default Dashboard
