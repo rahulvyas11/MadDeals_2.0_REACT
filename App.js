@@ -4,10 +4,10 @@ import React, { useState, useEffect } from "react"
 import { firebase } from "./config"
 import Login from "./src/screens/Login"
 import Registration from "./src/screens/Registration"
-import Dashboard from "./src/screens/Dashboard"
 import Settings from "./src/screens/Settings"
 import Map from "./src/screens/Map"
 import Ionicons from "react-native-vector-icons/Ionicons"
+import NavigateStack from "./src/screens/NavigateStack"
 
 const Tab = createBottomTabNavigator()
 
@@ -64,7 +64,7 @@ function App() {
         </Tab.Navigator>
       ) : (
         <Tab.Navigator>
-          <Tab.Screen
+          {/* <Tab.Screen
             name="Dashboard"
             component={Dashboard}
             options={{
@@ -75,6 +75,20 @@ function App() {
                   color={color}
                 />
               ),
+            }}
+          /> */}
+          <Tab.Screen
+            name="Main"
+            component={NavigateStack}
+            options={{
+              tabBarIcon: ({ focused, color, size }) => (
+                <Ionicons
+                  name={focused ? "home" : "home-outline"}
+                  size={size}
+                  color={color}
+                />
+              ),
+              headerShown: false
             }}
           />
           <Tab.Screen
