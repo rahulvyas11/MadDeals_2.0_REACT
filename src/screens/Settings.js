@@ -6,7 +6,7 @@ import { useNavigation } from "@react-navigation/native"
 import { View, Text, Button } from 'react-native';
 
 const Settings = ({ navigation }) => {
-  const navigation = useNavigation()
+  //const navigation = useNavigation()
 
   return (
     <View>

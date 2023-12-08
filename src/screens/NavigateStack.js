@@ -4,6 +4,7 @@ import Restaurant from "./Restaurant";
 import Settings from "./Settings"
 import Profile from "./Profile"
 import OtherSettings from "./OtherSettings"
+import ChangePassword from "./ChangePassword"
 
 // Stack for NewsScreen and Articles
 const Stack = createNativeStackNavigator();
@@ -16,6 +17,7 @@ export default function NavigateStack() {
             <Stack.Screen name="Settings" component={Settings}/>
             <Stack.Screen name="Profile" component={Profile}/>
             <Stack.Screen name="OtherSettings" component={OtherSettings}/>
+            <Stack.Screen name="ChangePassword" component={ChangePassword}/>
         </Stack.Navigator>
     );
 }
