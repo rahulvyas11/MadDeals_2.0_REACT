@@ -23,10 +23,37 @@ const Dashboard = () => {
   const [street, setStreet] = useState("")
   const [pCode, setPcode] = useState("")
   const [address, setAddress] = useState("")
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
+  const [radius, setRadius] = useState(1000)
+  const [popular, setPopular] = useState([])
+
 
   const updateLocation = async () => {
-    const geocodeLocation = await Location.geocodeAsync(address)
-  }
+    const geocodeLocation = await Location.geocodeAsync(address);
+    if (geocodeLocation.length > 0) {
+      setLatitude(geocodeLocation[0].latitude);
+      setLongitude(geocodeLocation[0].longitude);
+    }
+  };
+
+  var requestOptions = {
+    method: 'GET',
+  };
+
+
+
+  useEffect(() => {
+    fetch("https://api.geoapify.com/v2/places?categories=catering.restaurant&filter=circle:-89.398065,43.072633,1000&bias=proximity:-89.398065,43.072633&limit=2&apiKey=54e1a62e66a34d32a0f17b1de7af1121", requestOptions)
+      .then(response => response.json())
+      .then(data => {
+        setPopular(data.features)
+        console.log(data.features)
+        // console.log(popular[0].properties.name)
+      })
+      .catch(error => console.log('error', error));
+  }, [])
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,6 +72,8 @@ const Dashboard = () => {
             longitude: userData.location.coords.longitude,
             latitude: userData.location.coords.latitude,
           })
+
+
 
           const { name, postalCode } = reverseGeocodedAddress[0]
           setStreet(name)
@@ -92,73 +121,17 @@ const Dashboard = () => {
         <View>
           <Text style={{ fontWeight: "bold" }}>Popular Restaurants</Text>
           <Text>Check out what people around you have been trying:</Text>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 20 }}>
-            <TouchableOpacity
-              onPress={() => navigation.navigate("Restaurant")}
-            >
-              <Image
-                source={{
-                  uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/1200px-React-icon.svg.png'
-                }}
-                style={{ width: 100, height: 100 }}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => navigation.navigate("Restaurant")}
-            >
-              <Image
-                source={{
-                  uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/1200px-React-icon.svg.png'
-                }}
-                style={{ width: 100, height: 100 }}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => navigation.navigate("Restaurant")}
-            >
-              <Image
-                source={{
-                  uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/1200px-React-icon.svg.png'
-                }}
-                style={{ width: 100, height: 100 }}
-              />
-            </TouchableOpacity>
-          </View>
-
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 20 }}>
-            <TouchableOpacity
-              onPress={() => navigation.navigate("Restaurant")}
-            >
-              <Image
-                source={{
-                  uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/1200px-React-icon.svg.png'
-                }}
-                style={{ width: 100, height: 100 }}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => navigation.navigate("Restaurant")}
-            >
-              <Image
-                source={{
-                  uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/1200px-React-icon.svg.png'
-                }}
-                style={{ width: 100, height: 100 }}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => navigation.navigate("Restaurant")}
-            >
-              <Image
-                source={{
-                  uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/1200px-React-icon.svg.png'
-                }}
-                style={{ width: 100, height: 100 }}
-              />
-            </TouchableOpacity>
-          </View>
-
+          <ScrollView horizontal>
+            {
+              // Assuming popular is an array of restaurant objects
+              Object.values(popular).map((restaurant, index) => (
+                <Text key={index}>{restaurant.properties.name}</Text>
+              ))
+            }
+          </ScrollView>
         </View>
+
+
         <View>
           <Text style={{ fontWeight: "bold" }}>Top picks based on your preferences:</Text>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 20 }}>
