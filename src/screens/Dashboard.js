@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
-  TextInput
+  TextInput,
 } from "react-native"
 import { useState, useEffect } from "react"
 import { firebase } from "../../config"
@@ -27,6 +27,9 @@ const Dashboard = () => {
   const [longitude, setLongitude] = useState(null);
   const [radius, setRadius] = useState(1000)
   const [popular, setPopular] = useState([])
+  const [topPick, setTopPicks] = useState([])
+
+  const [todaysPick, setTodaysPick] = useState(null)
 
 
   const updateLocation = async () => {
@@ -41,17 +44,31 @@ const Dashboard = () => {
     method: 'GET',
   };
 
+  const currentDate = new Date();
+  const dayOfMonth = currentDate.getDate();
+
+  const randomNum = (dayOfMonth % 10) + 11;
 
 
   useEffect(() => {
-    fetch("https://api.geoapify.com/v2/places?categories=catering.restaurant&filter=circle:-89.398065,43.072633,1000&bias=proximity:-89.398065,43.072633&limit=2&apiKey=54e1a62e66a34d32a0f17b1de7af1121", requestOptions)
+    fetch("https://api.geoapify.com/v2/places?categories=catering.restaurant&filter=circle:-89.398065,43.072633,1000&bias=proximity:-89.398065,43.072633&limit=20&apiKey=54e1a62e66a34d32a0f17b1de7af1121", requestOptions)
+      .then(response => response.json())
+      .then(data => {
+        setPopular(data.features.slice(0, 10))
+        setTodaysPick(data.features[randomNum])
+      })
+      .catch(error => {
+        console.log('error', error)
+      });
+
+      fetch(`https://api.geoapify.com/v2/places?categories=catering.restaurant&filter=circle:${lon},${lat},${radius}&bias=proximity:${lon},${lat}&limit=5&apiKey=54e1a62e66a34d32a0f17b1de7af1121`, requestOptions)
       .then(response => response.json())
       .then(data => {
         setPopular(data.features)
-        console.log(data.features)
-        // console.log(popular[0].properties.name)
       })
-      .catch(error => console.log('error', error));
+      .catch(error => {
+        console.log('error', error)
+      });
   }, [])
 
 
@@ -89,6 +106,7 @@ const Dashboard = () => {
     fetchData()
   }, [])
 
+
   return (
     <View style={styles.container}>
       <Text style={{ fontSize: 26 }}>Hello, {user.firstName}</Text>
@@ -106,8 +124,8 @@ const Dashboard = () => {
       </View>
       <ScrollView>
         <Text style={{ fontWeight: "bold" }}>Today's Pick</Text>
-        <View style={{ padding: 20 }}>
-          <TouchableOpacity
+        <View>
+          {/* <TouchableOpacity
             onPress={() => navigation.navigate("Restaurant")}
           >
             <Image
@@ -116,16 +134,42 @@ const Dashboard = () => {
               }}
               style={{ width: 375, height: 200 }}
             />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
+
+          <View>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Restaurant", {rest : todaysPick})}
+            >
+              {todaysPick ? ( // Check if todaysPick has a value
+                <View style={styles.card}>
+                  <Text>{todaysPick.properties.name}</Text>
+                  <Text>{todaysPick.properties.distance} meters</Text>
+                </View>
+              ) : (
+                <Text>Loading...</Text> // Render a loading message or other indicator while data is being fetched
+              )}
+            </TouchableOpacity>
+          </View>
+
         </View>
         <View>
           <Text style={{ fontWeight: "bold" }}>Popular Restaurants</Text>
           <Text>Check out what people around you have been trying:</Text>
-          <ScrollView horizontal>
+          <ScrollView vertical>
             {
-              // Assuming popular is an array of restaurant objects
               Object.values(popular).map((restaurant, index) => (
-                <Text key={index}>{restaurant.properties.name}</Text>
+                <View key={index}>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate("Restaurant", { rest: restaurant })}
+                  >
+
+
+                    <View style={styles.card}>
+                      <Text>{restaurant.properties.name}</Text>
+                      <Text>{restaurant.properties.distance} meters</Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
               ))
             }
           </ScrollView>
@@ -239,6 +283,13 @@ const styles = StyleSheet.create({
     width: 325,
     marginTop: 10,
   },
+  card: {
+    padding: 16,
+    elevation: 5,
+    borderRadius: 10,
+    backgroundColor: 'grey',
+    margin: 5
+  }
 })
 
 export default Dashboard
