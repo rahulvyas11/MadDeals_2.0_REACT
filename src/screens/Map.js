@@ -10,28 +10,39 @@ const MapScreen = (props) => {
   const [secLon, setSecLon] = useState(null);
   const [name, setName] = useState('');
   const [polylineCoordinates, setPolylineCoordinates] = useState([]);
+  const [popular, setPopular] = useState([])
 
   useEffect(() => {
-    if (props.route && props.route.params && props.route.params.location) {
-      const { lat, lon } = props.route.params.location;
-      setSecLat(lat);
-      setSecLon(lon);
-      setName(props.route.params.location.name);
-    }
+    const fetchData = async () => {
+      let currentLocation;
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          setErrorMsg('Permission to access location was denied');
+          return;
+        }
+
+        currentLocation = await Location.getCurrentPositionAsync({});
+        setLocation(currentLocation);
+
+        if (props.route && props.route.params && props.route.params.location) {
+          const { lat, lon } = props.route.params.location;
+          setSecLat(lat);
+          setSecLon(lon);
+          setName(props.route.params.location.name);
+        } else {
+          const response = await fetch(`https://api.geoapify.com/v2/places?categories=catering.restaurant,catering.fast_food&filter=circle:${currentLocation.coords.longitude},${currentLocation.coords.latitude},1000&bias=proximity:${currentLocation.coords.longitude},${currentLocation.coords.latitude}&limit=100&apiKey=54e1a62e66a34d32a0f17b1de7af1121`);
+          const data = await response.json();
+          setPopular(data.features);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
   }, [props.route]);
 
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
-        return;
-      }
-
-      let currentLocation = await Location.getCurrentPositionAsync({});
-      setLocation(currentLocation);
-    })();
-  }, []);
 
   useEffect(() => {
     if (location && secLat !== null && secLon !== null) {
@@ -69,6 +80,18 @@ const MapScreen = (props) => {
             title="Your Location"
             description="You are here!"
           />
+          {popular.length > 0 && popular.map((place, index) => (
+            <Marker
+              key={index}
+              coordinate={{
+                latitude: place.geometry.coordinates[1],
+                longitude: place.geometry.coordinates[0],
+              }}
+              title={place.properties.name}
+              description={place.properties.address}
+              pinColor="blue" // Adjust pin color as needed
+            />
+          ))}
           {secLat !== null && secLon !== null && (
             <Marker
               coordinate={{
@@ -83,8 +106,8 @@ const MapScreen = (props) => {
           {polylineCoordinates.length === 2 && (
             <Polyline
               coordinates={polylineCoordinates}
-              strokeColor="#FF0000" // Line color
-              strokeWidth={2} // Line width
+              strokeColor="#000000" // Line color
+              strokeWidth={7} // Line width
             />
           )}
         </MapView>

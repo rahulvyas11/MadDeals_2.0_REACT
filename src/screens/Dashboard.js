@@ -11,7 +11,7 @@ import {
   Button,
   // Picker
 } from "react-native"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { firebase } from "../../config"
 import React from "react"
 import { useNavigation } from "@react-navigation/native"
@@ -21,6 +21,7 @@ import { Feather } from "@expo/vector-icons"
 
 const Dashboard = () => {
   const navigation = useNavigation()
+  const textInputRef = useRef(null);
   const [name, setName] = useState("")
   const [user, setUser] = useState("")
   const [street, setStreet] = useState("")
@@ -31,6 +32,9 @@ const Dashboard = () => {
   const [radius, setRadius] = useState('1000')
   const [popular, setPopular] = useState([])
   const [topPick, setTopPicks] = useState([])
+  const [location, setLocation] = useState(null)
+  const [addr, setAddr] = useState("")
+  const [currentLocation, setCurrentLocation] = useState(null)
 
   const [todaysPick, setTodaysPick] = useState(null)
 
@@ -42,6 +46,52 @@ const Dashboard = () => {
       setLongitude(geocodeLocation[0].longitude);
     }
   };
+
+  
+  useEffect(() => {
+  (async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      setErrorMsg('Permission to access location was denied');
+      return;
+    }
+
+    let currentLocation = await Location.getCurrentPositionAsync({});
+    setCurrentLocation(currentLocation);
+  })();
+}, []);
+
+
+
+  useEffect(() => {
+    const addressToCoordinates = async () => {
+      try {
+        let location = await Location.geocodeAsync(address);
+        if (location.length > 0) {
+          setLatitude(location[0].latitude);
+          setLongitude(location[0].longitude);
+        } else {
+          setLatitude(null);
+          setLongitude(null);
+        }
+      } catch (error) {
+        console.error('Error geocoding address:', error);
+        setLatitude(null);
+        setLongitude(null);
+      }
+    };
+
+    addressToCoordinates();
+  }, [address]);
+
+
+  const clearAddress = () => {
+    setLatitude(null)
+    setLongitude(null)
+    if (textInputRef.current) {
+      textInputRef.current.clear();
+    }
+  }
 
   var requestOptions = {
     method: 'GET',
@@ -76,15 +126,33 @@ const Dashboard = () => {
 
     categories = categories.replace(/,$/, '');
 
-    const url = `https://api.geoapify.com/v2/places?categories=${categories}&filter=circle:-89.398065,43.072633,${radius}&bias=proximity:-89.398065,43.072633&limit=10&apiKey=54e1a62e66a34d32a0f17b1de7af1121`;
+    const lat = latitude !== null ? parseFloat(latitude).toFixed(6) : 
+      currentLocation && currentLocation.coords.latitude ?
+      parseFloat(currentLocation.coords.latitude).toFixed(6) : 0.0;
+
+    const lon = longitude !== null ? parseFloat(longitude).toFixed(6) :
+      currentLocation && currentLocation.coords.longitude ?
+      parseFloat(currentLocation.coords.longitude).toFixed(6) : 0.0;
+
+
+    const url = `https://api.geoapify.com/v2/places?categories=${categories}&filter=circle:${lon},${lat},${radius}&bias=proximity:${lon},${lat}&limit=10&apiKey=54e1a62e66a34d32a0f17b1de7af1121`;
+    // const url = `https://api.geoapify.com/v2/places?categories=${categories}&filter=circle:,${radius}&bias=proximity:&limit=10&apiKey=54e1a62e66a34d32a0f17b1de7af1121`
     return url;
   };
 
 
   useEffect(() => {
-    fetch("https://api.geoapify.com/v2/places?categories=catering.restaurant,catering.fast_food&filter=circle:-89.398065,43.072633,1000&bias=proximity:-89.398065,43.072633&limit=20&apiKey=54e1a62e66a34d32a0f17b1de7af1121", requestOptions)
+    const lat = currentLocation && currentLocation.coords.latitude ?
+    parseFloat(currentLocation.coords.latitude).toFixed(6) : 0.0;
+
+    const lon = currentLocation && currentLocation.coords.longitude ?
+      parseFloat(currentLocation.coords.longitude).toFixed(6) : 0.0;
+
+
+    fetch(`https://api.geoapify.com/v2/places?categories=catering.restaurant,catering.fast_food&filter=circle:${lon},${lat},1000&bias=proximity:${lon},${lat}&limit=20&apiKey=54e1a62e66a34d32a0f17b1de7af1121`, requestOptions)
       .then(response => response.json())
       .then(data => {
+        console.log(data.features)
         setPopular(data.features.slice(0, 5))
         setTodaysPick(data.features[randomNum])
       })
@@ -102,7 +170,7 @@ const Dashboard = () => {
       .catch(error => {
         console.log('error', error)
       });
-  }, [radius, selectedCategories])
+  }, [radius, selectedCategories, latitude, longitude, address, currentLocation])
 
 
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -152,16 +220,25 @@ const Dashboard = () => {
 
       <Text style={{ fontSize: 26 }}>Hello, {user.firstName}</Text>
       <View style={styles.locationContainer}>
-        <Feather style={{ margin: 3 }} name="map-pin" size={20} color="blue" />
+        <TouchableOpacity
+          onPress={() => clearAddress()}
+        >
+          <Feather style={{ margin: 3 }} name="map-pin" size={20} color="blue" />
+        </TouchableOpacity>
         <TextInput
+          ref={textInputRef}
           style={{
             fontSize: 18,
             padding: 10,
           }}
           placeholder={`${street}, ${pCode}`}
-          onChangeText={setAddress}
+          onChangeText={setAddr}
         />
-        <Feather style={{ margin: 3 }} name="search" size={20} color="black" />
+        <TouchableOpacity 
+          onPress={() => setAddress(addr)}
+        >
+          <Feather style={{ margin: 3 }} name="search" size={20} color="black" />
+        </TouchableOpacity>
       </View>
       <TouchableOpacity onPress={toggleModal} style={styles.openModalButton}>
         <Text style={styles.openModalButtonText}>Filters</Text>
@@ -169,22 +246,11 @@ const Dashboard = () => {
       <ScrollView>
         <Text style={{ fontWeight: "bold" }}>Today's Pick</Text>
         <View>
-          {/* <TouchableOpacity
-            onPress={() => navigation.navigate("Restaurant")}
-          >
-            <Image
-              source={{
-                uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/1200px-React-icon.svg.png'
-              }}
-              style={{ width: 375, height: 200 }}
-            />
-          </TouchableOpacity> */}
-
           <View>
             <TouchableOpacity
               onPress={() => navigation.navigate("Restaurant", { rest: todaysPick })}
             >
-              {todaysPick ? ( 
+              {todaysPick ? (
                 <View style={styles.card}>
                   <Text>{todaysPick.properties.name}</Text>
                   <Text>{todaysPick.properties.distance} meters</Text>
