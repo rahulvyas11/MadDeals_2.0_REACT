@@ -6,7 +6,6 @@ import Profile from "./Profile"
 import OtherSettings from "./OtherSettings"
 import ChangePassword from "./ChangePassword"
 
-// Stack for NewsScreen and Articles
 const Stack = createNativeStackNavigator();
 
 export default function NavigateStack() {

@@ -1,7 +1,10 @@
 import { React, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { useNavigation } from "@react-navigation/native"
+import * as SecureStore from 'expo-secure-store';
 
 const Restaurant = (props) => {
+  const navigation = useNavigation();
   const restaurant = props.route.params.rest;
   const [address, setAddress] = useState(props.route.params.rest.properties.address_line2)
   const [distance, setDistance] = useState(props.route.params.rest.properties.distance)
@@ -41,7 +44,7 @@ const Restaurant = (props) => {
       <View style={styles.row}>
         <Text style={styles.label}>Hours:</Text>
         {
-          hours === null ? (
+          hours === undefined ? (
             <Text style={styles.info}>No info available</Text>
           ) : (
             <Text style={styles.info}>{hours}</Text>
@@ -52,7 +55,14 @@ const Restaurant = (props) => {
         <Text style={styles.label}>Address:</Text>
         <Text style={styles.info}>{address}</Text>
       </View>
-      <Text style={styles.mapLink}>View on map</Text>
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate("Map", { location: props.route.params.rest.properties })
+        }}
+      >
+        <Text style={styles.mapLink}>View on map</Text>
+      </TouchableOpacity>
+
     </View>
   );
 };
