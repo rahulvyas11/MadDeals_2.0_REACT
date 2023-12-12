@@ -1,162 +1,65 @@
-// //import React from 'react';
-// import { View, Text } from 'react-native';
-// import {
-//     Alert,
-//     Button,
-//     TextInput,
-//     StyleSheet,
-//     TouchableOpacity,
-//   } from "react-native"
-//   import React, { useState } from "react"
-//   import { firebase } from "../../config"
-//   import { useNavigation } from "@react-navigation/native"
-//   import { useEffect } from "react"
-//   import * as Location from "expo-location"
-
-// const Profile = () => {
-
-//     firstName =  firebase.firstName
-//     lastName = firebase.lastName
-//     email = firebase.email
-//     password = firebase.password
-//     entryError = firebase.entryError
-//     location = firebase.location
-
-    
-//   return (
-//     <View style={styles.container}>
-
-//     <Text style={styles.inputName}>First Name</Text>
-//     <TextInput
-//       style={styles.input}
-//       value={firstName}
-//       onChangeText={(text) => setFirstName(text)}
-//     />
-//     <Text style={styles.inputName}>Last Name</Text>
-//     <TextInput
-//       style={styles.input}
-//       value={lastName}
-//       onChangeText={(text) => setLastName(text)}
-//     />
-//     <Text style={styles.inputName}>Email</Text>
-//     <TextInput
-//       style={styles.input}
-//       value={email}
-//       onChangeText={(text) => {
-//         setEmail(text)
-//         setEntryError("")
-//       }}
-//       keyboardType="email-address"
-//     />
-//     <Text style={styles.inputName}>Password</Text>
-//     <TextInput
-//       style={styles.input}
-//       value={password}
-//       onChangeText={(text) => {
-//         setPassword(text)
-//         setEntryError("")
-//       }}
-//       secureTextEntry={true}
-//     />
-//     {entryError ? <Text style={styles.errorText}>{entryError}</Text> : null}
-//     <TouchableOpacity
-//       style={styles.signUpButton}
-//       onPress={() =>
-//         registerUser(email, password, firstName, lastName, location)
-//       }
-//     >
-//       <Text style={[styles.buttonText, { color: "#EAF5EC" }]}>Signup</Text>
-//     </TouchableOpacity>
-
-//     <TouchableOpacity
-//       style={styles.neverMind}
-//       onPress={() => navigation.navigate("Login")}
-//     >
-//       <Text style={[styles.buttonText, { color: "#1C251E" }]}>
-//         Nevermind!
-//       </Text>
-//     </TouchableOpacity>
-//   </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//     container: {
-//       flex: 1,
-//       backgroundColor: "#fff",
-//       alignItems: "center",
-//       justifyContent: "center",
-//     },
-//     errorText: {
-//       color: "red",
-//       fontSize: 14,
-//       marginBottom: 5,
-//     },
-//     buttonText: {
-//       color: "white",
-//       textAlign: "center",
-//       fontSize: 16,
-//       fontWeight: "bold",
-//     },
-//     input: {
-//       height: 40,
-//       width: 200,
-//       borderColor: "gray",
-//       borderWidth: 1,
-//       borderRadius: 8,
-//       marginBottom: 16,
-//       marginTop: 16,
-//       paddingHorizontal: 10,
-//     },
-//     inputName: {
-//       fontSize: 16,
-//       marginBottom: 1,
-//     },
-//     signUpButton: {
-//       borderRadius: 5,
-//       marginTop: 5,
-//       backgroundColor: "#1C251E",
-//       paddingVertical: 10,
-//       paddingHorizontal: 20,
-//       borderRadius: 5,
-//       borderWidth: 1,
-//       borderColor: "#ddd",
-//       elevation: 5,
-//     },
-//     neverMind: {
-//       marginTop: 10,
-//       backgroundColor: "#EAF5EC",
-//       paddingVertical: 10,
-//       paddingHorizontal: 20,
-//       borderRadius: 5,
-//       borderWidth: 1,
-//       borderColor: "#ddd",
-//       elevation: 5,
-//     },
-//     grayWhiteButton: {
-//       backgroundColor: "gray",
-//       color: "white",
-//       padding: 10,
-//       borderRadius: 5,
-//       textAlign: "center",
-//       fontWeight: "bold",
-//     },
-//   })
-// export default Profile;
-import React from 'react';
+import { React, useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, TextInput, StyleSheet, Button } from 'react-native';
 import { useNavigation } from "@react-navigation/native"
+import { firebase } from "../../config"
 
 const Profile = ({ navigation }) => {
+  const [user, setUser] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+  });
   const handlePress = (field) => {
     // Handle the press event for each field as needed
     console.log(`Pressed ${field}`);
   };
 
-  const handleChangePassword = () => {
-    // Handle the press event for the "Change Password" button
-    console.log('Change Password Pressed');
+
+  const handleFirstNameChange = (text) => {
+    setUser({ ...user, firstName: text });
   };
+
+  const handleLastNameChange = (text) => {
+    setUser({ ...user, lastName: text });
+  };
+
+  const handleEmailChange = (text) => {
+    setUser({ ...user, email: text });
+  };
+
+  const update = () => {
+    const { firstName, lastName, email } = user;
+    const currentUser = firebase.auth().currentUser;
+    const uid = currentUser.uid;
+
+    currentUser.updateEmail(email).then(() => {
+      Alert.alert("Success", "Email updated successfully.")
+    })
+    .catch((error) => {
+      Alert.alert("Error", error.message)
+    })
+
+
+    firebase.firestore()
+      .collection('users')
+      .doc(uid)
+      .update({
+        'firstName' : firstName,
+        'lastName' : lastName,
+        'email' : email,
+      })
+      .then(() => {
+        console.log('Profile updated successfully');
+      })
+      .catch((error) => {
+        console.error('Error updating profile:', error);
+      });
+
+  };
+
+
+
+  console.log(firebase.auth().currentUser)
 
   return (
     <View style={styles.container}>
@@ -166,7 +69,8 @@ const Profile = ({ navigation }) => {
           <TextInput
             style={styles.profileItem}
             placeholder="John"
-            onChangeText={(text) => console.log(`First Name: ${text}`)}
+            onChangeText={handleFirstNameChange}
+            value={user.firstName}
           />
         </View>
 
@@ -175,7 +79,8 @@ const Profile = ({ navigation }) => {
           <TextInput
             style={styles.profileItem}
             placeholder="Doe"
-            onChangeText={(text) => console.log(`Last Name: ${text}`)}
+            onChangeText={handleLastNameChange}
+            value={user.lastName}
           />
         </View>
       </View>
@@ -185,11 +90,12 @@ const Profile = ({ navigation }) => {
         <TextInput
           style={styles.profileItem}
           placeholder="johndoe@example.com"
-          onChangeText={(text) => console.log(`Email: ${text}`)}
+          onChangeText={handleEmailChange}
+          value={user.email}
         />
       </View>
 
-      <View style={styles.bubbleContainer}>
+      {/* <View style={styles.bubbleContainer}>
         <Text style={styles.bubbleTitle}>Address 1</Text>
         <TextInput
           style={styles.profileItem}
@@ -234,10 +140,11 @@ const Profile = ({ navigation }) => {
             onChangeText={(text) => console.log(`State: ${text}`)}
           />
         </View>
-      </View>
+      </View> */}
 
       <View style={styles.centeredButton}>
         <Button title="Change Password" onPress={() => navigation.navigate("Reset Password")} />
+        <Button title="Update" onPress={() => update()} />
       </View>
     </View>
   );
