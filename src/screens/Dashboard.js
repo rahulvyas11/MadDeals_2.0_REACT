@@ -222,25 +222,25 @@ const Dashboard = () => {
 
   // COUPONS
   // -- Web scraping logic -- not functioning
-  useEffect(() => {
-    const fetchDeals = async (latitude, longitude) => {
-      try {
-        const response = await axios.get('http://localhost:5001//api/deals', {
-          params: {
-            latitude,
-            longitude,
-          },
-        });
+  // useEffect(() => {
+  //   const fetchDeals = async (latitude, longitude) => {
+  //     try {
+  //       const response = await axios.get('http://localhost:5001//api/deals', {
+  //         params: {
+  //           latitude,
+  //           longitude,
+  //         },
+  //       });
     
-        const deals = response.data;
-        console.log(deals);
-      } catch (error) {
-        console.error('Error fetching deals:', error);
-      }
-    };
+  //       const deals = response.data;
+  //       console.log(deals);
+  //     } catch (error) {
+  //       console.error('Error fetching deals:', error);
+  //     }
+  //   };
 
-    fetchDeals();
-  }, []);
+  //   fetchDeals();
+  // }, []);
 
   /* Coupoins -- API LOGIC --
 

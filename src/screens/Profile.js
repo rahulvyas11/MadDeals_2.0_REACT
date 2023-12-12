@@ -2,6 +2,7 @@ import { React, useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, TextInput, StyleSheet, Button } from 'react-native';
 import { useNavigation } from "@react-navigation/native"
 import { firebase } from "../../config"
+import { Alert } from 'react-native';
 
 const Profile = ({ navigation }) => {
   const [user, setUser] = useState({
@@ -59,7 +60,7 @@ const Profile = ({ navigation }) => {
           .update(updateData);
       })
       .then(() => {
-        console.log('Profile updated successfully');
+        Alert.alert("Success", "Profile updated successfully")
       })
       .catch((error) => {
         console.error('Error updating profile:', error);
