@@ -37,6 +37,7 @@ const Dashboard = () => {
   const [todaysPick, setTodaysPick] = useState(null)
   const [selectedCategories, setSelectedCategories] = useState([ "restaurant, fast_food"])
   const [isModalVisible, setIsModalVisible] = useState(false)
+  const [deals, setDeals] = useState([]);
 
   // Takes the users current location
   useEffect(() => {
@@ -218,6 +219,56 @@ const Dashboard = () => {
 
     fetchData()
   }, [])
+
+  // COUPONS
+  // -- Web scraping logic -- not functioning
+  useEffect(() => {
+    const fetchDeals = async (latitude, longitude) => {
+      try {
+        const response = await axios.get('http://localhost:5001//api/deals', {
+          params: {
+            latitude,
+            longitude,
+          },
+        });
+    
+        const deals = response.data;
+        console.log(deals);
+      } catch (error) {
+        console.error('Error fetching deals:', error);
+      }
+    };
+
+    fetchDeals();
+  }, []);
+
+  /* Coupoins -- API LOGIC --
+
+  useEffect(() => {
+    const lat =
+      currentLocation && currentLocation.coords.latitude
+        ? parseFloat(currentLocation.coords.latitude).toFixed(6)
+        : 0.0
+
+    const lon =
+      currentLocation && currentLocation.coords.longitude
+        ? parseFloat(currentLocation.coords.longitude).toFixed(6)
+        : 0.0
+
+    fetch(
+      `INSERT_API_URL_WITH_LOCATION`,
+      requestOptions
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        setDeals(data)
+      })
+      .catch((error) => {
+        console.log("error", error)
+      })
+  }, []);
+
+  */
 
   return (
     <View style={styles.container}>
@@ -445,6 +496,30 @@ const Dashboard = () => {
             </ScrollView>
           </View>
         </View>
+        
+        {/* Coupon display logic - Not properly functioning */}
+        <View>
+          <Text style={{ fontWeight: "bold" }}>
+            Top deals in your location:
+          </Text>
+          <ScrollView>
+            {deals.map((deal, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() =>
+                  navigation.navigate("Deals", { rest: deal })
+                }
+              >
+                <View style={styles.card}>
+                  <Text style={{ color: 'white', fontWeight: 'bold' }}>
+                    {deal.title}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
       </ScrollView>
     </View>
   )
@@ -512,4 +587,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default Dashboard
+export default Dashboard;

@@ -17,10 +17,13 @@
     "@react-navigation/native": "^6.1.9",
     "@react-navigation/native-stack": "^6.9.17",
     "@react-navigation/stack": "^6.3.20",
+    "axios": "^1.6.2",
+    "cheerio": "^1.0.0-rc.12",
     "expo": "~49.0.15",
     "expo-location": "~16.1.0",
     "expo-secure-store": "~12.3.1",
     "expo-status-bar": "~1.6.0",
+    "express": "^4.18.2",
     "firebase": "^10.7.0",
     "react": "18.2.0",
     "react-native": "0.72.6",
@@ -38,5 +41,9 @@
   "devDependencies": {
     "@babel/core": "^7.20.0"
   },
-  "private": true
+  "private": true,
+  "description": "#1. In order to use, just run 'npm start' in the terminal while in the project directory, and install Expo on your phone, then scan the QR code given by the terminal and you should see how the app looks!",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
