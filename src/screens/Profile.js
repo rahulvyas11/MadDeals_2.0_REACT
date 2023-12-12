@@ -1,17 +1,65 @@
-import React from 'react';
+import { React, useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, TextInput, StyleSheet, Button } from 'react-native';
 import { useNavigation } from "@react-navigation/native"
+import { firebase } from "../../config"
 
 const Profile = ({ navigation }) => {
+  const [user, setUser] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+  });
   const handlePress = (field) => {
     // Handle the press event for each field as needed
     console.log(`Pressed ${field}`);
   };
 
-  const handleChangePassword = () => {
-    // Handle the press event for the "Change Password" button
-    console.log('Change Password Pressed');
+
+  const handleFirstNameChange = (text) => {
+    setUser({ ...user, firstName: text });
   };
+
+  const handleLastNameChange = (text) => {
+    setUser({ ...user, lastName: text });
+  };
+
+  const handleEmailChange = (text) => {
+    setUser({ ...user, email: text });
+  };
+
+  const update = () => {
+    const { firstName, lastName, email } = user;
+    const currentUser = firebase.auth().currentUser;
+    const uid = currentUser.uid;
+
+    currentUser.updateEmail(email).then(() => {
+      Alert.alert("Success", "Email updated successfully.")
+    })
+    .catch((error) => {
+      Alert.alert("Error", error.message)
+    })
+
+
+    firebase.firestore()
+      .collection('users')
+      .doc(uid)
+      .update({
+        'firstName' : firstName,
+        'lastName' : lastName,
+        'email' : email,
+      })
+      .then(() => {
+        console.log('Profile updated successfully');
+      })
+      .catch((error) => {
+        console.error('Error updating profile:', error);
+      });
+
+  };
+
+
+
+  console.log(firebase.auth().currentUser)
 
   return (
     <View style={styles.container}>
@@ -21,7 +69,8 @@ const Profile = ({ navigation }) => {
           <TextInput
             style={styles.profileItem}
             placeholder="John"
-            onChangeText={(text) => console.log(`First Name: ${text}`)}
+            onChangeText={handleFirstNameChange}
+            value={user.firstName}
           />
         </View>
 
@@ -30,7 +79,8 @@ const Profile = ({ navigation }) => {
           <TextInput
             style={styles.profileItem}
             placeholder="Doe"
-            onChangeText={(text) => console.log(`Last Name: ${text}`)}
+            onChangeText={handleLastNameChange}
+            value={user.lastName}
           />
         </View>
       </View>
@@ -40,11 +90,12 @@ const Profile = ({ navigation }) => {
         <TextInput
           style={styles.profileItem}
           placeholder="johndoe@example.com"
-          onChangeText={(text) => console.log(`Email: ${text}`)}
+          onChangeText={handleEmailChange}
+          value={user.email}
         />
       </View>
 
-      <View style={styles.bubbleContainer}>
+      {/* <View style={styles.bubbleContainer}>
         <Text style={styles.bubbleTitle}>Address 1</Text>
         <TextInput
           style={styles.profileItem}
@@ -89,10 +140,11 @@ const Profile = ({ navigation }) => {
             onChangeText={(text) => console.log(`State: ${text}`)}
           />
         </View>
-      </View>
+      </View> */}
 
       <View style={styles.centeredButton}>
         <Button title="Change Password" onPress={() => navigation.navigate("Reset Password")} />
+        <Button title="Update" onPress={() => update()} />
       </View>
     </View>
   );
