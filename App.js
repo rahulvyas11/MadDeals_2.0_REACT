@@ -8,6 +8,7 @@ import Settings from "./src/screens/Settings"
 import Map from "./src/screens/Map"
 import Ionicons from "react-native-vector-icons/Ionicons"
 import NavigateStack from "./src/screens/NavigateStack"
+import SettingsStack from "./src/screens/SettingsStack"
 
 const Tab = createBottomTabNavigator()
 
@@ -78,7 +79,7 @@ function App() {
             }}
           /> */}
           <Tab.Screen
-            name="Main"
+            name="Home"
             component={NavigateStack}
             options={{
               tabBarIcon: ({ focused, color, size }) => (
@@ -104,7 +105,7 @@ function App() {
               ),
             }}
           />
-          <Tab.Screen
+          {/* <Tab.Screen
             name="Settings"
             component={Settings}
             options={{
@@ -115,6 +116,20 @@ function App() {
                   color={color}
                 />
               ),
+            }}
+          /> */}
+          <Tab.Screen
+            name="Settings"
+            component={SettingsStack}
+            options={{
+              tabBarIcon: ({ focused, color, size }) => (
+                <Ionicons
+                  name={focused ? "ios-settings" : "ios-settings-outline"}
+                  size={size}
+                  color={color}
+                />
+              ),
+              headerShown: false
             }}
           />
         </Tab.Navigator>

@@ -34,17 +34,11 @@ const Dashboard = () => {
   const [location, setLocation] = useState(null)
   const [addr, setAddr] = useState("")
   const [currentLocation, setCurrentLocation] = useState(null)
-
   const [todaysPick, setTodaysPick] = useState(null)
+  const [selectedCategories, setSelectedCategories] = useState([ "restaurant, fast_food"])
+  const [isModalVisible, setIsModalVisible] = useState(false)
 
-  const updateLocation = async () => {
-    const geocodeLocation = await Location.geocodeAsync(address)
-    if (geocodeLocation.length > 0) {
-      setLatitude(geocodeLocation[0].latitude)
-      setLongitude(geocodeLocation[0].longitude)
-    }
-  }
-
+  // Takes the users current location
   useEffect(() => {
     ;(async () => {
       let { status } = await Location.requestForegroundPermissionsAsync()
@@ -58,6 +52,7 @@ const Dashboard = () => {
     })()
   }, [])
 
+  // Takes in the users address and geocodes it to get the coordinates
   useEffect(() => {
     const addressToCoordinates = async () => {
       try {
@@ -79,6 +74,7 @@ const Dashboard = () => {
     addressToCoordinates()
   }, [address])
 
+  // Reinitialize fields 
   const clearAddress = () => {
     setLatitude(null)
     setLongitude(null)
@@ -87,19 +83,13 @@ const Dashboard = () => {
     }
   }
 
-  var requestOptions = {
-    method: "GET",
-  }
-
+  // Current Date to randomize Todays pick
   const currentDate = new Date()
   const dayOfMonth = currentDate.getDate()
-
   const randomNum = (dayOfMonth % 10) + 6
 
-  const [selectedCategories, setSelectedCategories] = useState([
-    "restaurant, fast_food",
-  ])
-
+  
+  // Toggles categories based on users choice
   const toggleCategory = (category) => {
     if (selectedCategories.includes(category)) {
       setSelectedCategories(
@@ -110,6 +100,12 @@ const Dashboard = () => {
     }
   }
 
+
+  var requestOptions = {
+    method: "GET",
+  }
+
+  // Creates URL for custom search
   const generateUrl = () => {
     let categories = ""
 
@@ -142,6 +138,7 @@ const Dashboard = () => {
     return url
   }
 
+  // API requests
   useEffect(() => {
     const lat =
       currentLocation && currentLocation.coords.latitude
@@ -159,7 +156,6 @@ const Dashboard = () => {
     )
       .then((response) => response.json())
       .then((data) => {
-        console.log(data.features)
         setPopular(data.features.slice(0, 5))
         setTodaysPick(data.features[randomNum])
       })
@@ -186,8 +182,7 @@ const Dashboard = () => {
     currentLocation,
   ])
 
-  const [isModalVisible, setIsModalVisible] = useState(false)
-
+  // Toggle Modal open and close
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible)
   }
@@ -258,7 +253,7 @@ const Dashboard = () => {
         <Text style={styles.openModalButtonText}>Filters</Text>
       </TouchableOpacity>
       <ScrollView>
-        <Text style={{ fontWeight: "bold", marginBottom: 5 }}>
+        <Text style={{ fontWeight: "bold", marginBottom: 5, fontSize: 29 }}>
           Today's Pick
         </Text>
         <View>
@@ -438,8 +433,8 @@ const Dashboard = () => {
                       }
                     >
                       <View style={styles.card}>
-                        <Text>{restaurant.properties.name}</Text>
-                        <Text>{restaurant.properties.distance} meters</Text>
+                        <Text style={{ color: "white", fontWeight: "bold" }}>{restaurant.properties.name}</Text>
+                        <Text style={{ color: "white" }}>{restaurant.properties.distance} meters</Text>
                       </View>
                     </TouchableOpacity>
                   </View>
@@ -459,9 +454,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    // alignItems: "center",
-    justifyContent: "flex-start", // Updated to "flex-start" to align content at the top
-    paddingTop: 20, // Optional: Add padding from the top if needed
+    justifyContent: "flex-start", 
+    paddingTop: 20, 
     alignItems: "center",
     justifyContent: "flex-start",
     paddingTop: 20,
@@ -482,8 +476,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     backgroundColor: "#232b2b",
     bordercolor: "#ddd",
-    elevation: 2, // Add elevation for Android shadows
-    shadowColor: "#414a4c", // Add shadow for iOS shadows
+    elevation: 2, 
+    shadowColor: "#414a4c", 
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 2,

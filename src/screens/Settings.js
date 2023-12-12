@@ -11,7 +11,7 @@ const Settings = () => {
   }
 
   const navigateToOtherSettings = () => {
-    navigation.navigate("OtherSettings")
+    navigation.navigate("Other Settings")
   }
 
   return (
@@ -27,7 +27,7 @@ const Settings = () => {
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.card}
-        onPress={() => navigation.navigate("ChangePassword")}
+        onPress={() => navigation.navigate("Reset Password")}
       >
         <Text style={styles.cardText}>Reset Password</Text>
       </TouchableOpacity>

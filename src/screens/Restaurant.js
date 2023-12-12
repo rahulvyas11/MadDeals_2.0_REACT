@@ -46,10 +46,6 @@ const Restaurant = (props) => {
         )}
       </View>
       <View style={styles.row}>
-        <Text style={styles.label}>Price:</Text>
-        <Text style={styles.info}>$$$</Text>
-      </View>
-      <View style={styles.row}>
         <Text style={styles.label}>Coupons:</Text>
         <Text style={styles.info}></Text>
       </View>

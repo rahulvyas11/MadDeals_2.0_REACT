@@ -237,7 +237,7 @@ const Profile = ({ navigation }) => {
       </View>
 
       <View style={styles.centeredButton}>
-        <Button title="Change Password" onPress={() => navigation.navigate("ChangePassword")} />
+        <Button title="Change Password" onPress={() => navigation.navigate("Reset Password")} />
       </View>
     </View>
   );
