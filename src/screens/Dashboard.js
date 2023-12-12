@@ -18,18 +18,17 @@ import { useNavigation } from "@react-navigation/native"
 import * as Location from "expo-location"
 import { Feather } from "@expo/vector-icons"
 
-
 const Dashboard = () => {
   const navigation = useNavigation()
-  const textInputRef = useRef(null);
+  const textInputRef = useRef(null)
   const [name, setName] = useState("")
   const [user, setUser] = useState("")
   const [street, setStreet] = useState("")
   const [pCode, setPcode] = useState("")
   const [address, setAddress] = useState("")
-  const [latitude, setLatitude] = useState(null);
-  const [longitude, setLongitude] = useState(null);
-  const [radius, setRadius] = useState('1000')
+  const [latitude, setLatitude] = useState(null)
+  const [longitude, setLongitude] = useState(null)
+  const [radius, setRadius] = useState("1000")
   const [popular, setPopular] = useState([])
   const [topPick, setTopPicks] = useState([])
   const [location, setLocation] = useState(null)
@@ -38,147 +37,160 @@ const Dashboard = () => {
 
   const [todaysPick, setTodaysPick] = useState(null)
 
-
   const updateLocation = async () => {
-    const geocodeLocation = await Location.geocodeAsync(address);
+    const geocodeLocation = await Location.geocodeAsync(address)
     if (geocodeLocation.length > 0) {
-      setLatitude(geocodeLocation[0].latitude);
-      setLongitude(geocodeLocation[0].longitude);
+      setLatitude(geocodeLocation[0].latitude)
+      setLongitude(geocodeLocation[0].longitude)
     }
-  };
+  }
 
-  
   useEffect(() => {
-  (async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') {
-      setErrorMsg('Permission to access location was denied');
-      return;
-    }
+    ;(async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync()
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied")
+        return
+      }
 
-    let currentLocation = await Location.getCurrentPositionAsync({});
-    setCurrentLocation(currentLocation);
-  })();
-}, []);
-
-
+      let currentLocation = await Location.getCurrentPositionAsync({})
+      setCurrentLocation(currentLocation)
+    })()
+  }, [])
 
   useEffect(() => {
     const addressToCoordinates = async () => {
       try {
-        let location = await Location.geocodeAsync(address);
+        let location = await Location.geocodeAsync(address)
         if (location.length > 0) {
-          setLatitude(location[0].latitude);
-          setLongitude(location[0].longitude);
+          setLatitude(location[0].latitude)
+          setLongitude(location[0].longitude)
         } else {
-          setLatitude(null);
-          setLongitude(null);
+          setLatitude(null)
+          setLongitude(null)
         }
       } catch (error) {
-        console.error('Error geocoding address:', error);
-        setLatitude(null);
-        setLongitude(null);
+        console.error("Error geocoding address:", error)
+        setLatitude(null)
+        setLongitude(null)
       }
-    };
+    }
 
-    addressToCoordinates();
-  }, [address]);
-
+    addressToCoordinates()
+  }, [address])
 
   const clearAddress = () => {
     setLatitude(null)
     setLongitude(null)
     if (textInputRef.current) {
-      textInputRef.current.clear();
+      textInputRef.current.clear()
     }
   }
 
   var requestOptions = {
-    method: 'GET',
-  };
+    method: "GET",
+  }
 
-  const currentDate = new Date();
-  const dayOfMonth = currentDate.getDate();
+  const currentDate = new Date()
+  const dayOfMonth = currentDate.getDate()
 
-  const randomNum = (dayOfMonth % 10) + 6;
+  const randomNum = (dayOfMonth % 10) + 6
 
-  const [selectedCategories, setSelectedCategories] = useState(['restaurant, fast_food']);
+  const [selectedCategories, setSelectedCategories] = useState([
+    "restaurant, fast_food",
+  ])
 
   const toggleCategory = (category) => {
     if (selectedCategories.includes(category)) {
-      setSelectedCategories(selectedCategories.filter((item) => item !== category));
+      setSelectedCategories(
+        selectedCategories.filter((item) => item !== category)
+      )
     } else {
-      setSelectedCategories([...selectedCategories, category]);
+      setSelectedCategories([...selectedCategories, category])
     }
-
-  };
+  }
 
   const generateUrl = () => {
-    let categories = '';
+    let categories = ""
 
-    if (selectedCategories.includes('restaurant')) {
-      categories += 'catering.restaurant,';
+    if (selectedCategories.includes("restaurant")) {
+      categories += "catering.restaurant,"
     }
 
-    if (selectedCategories.includes('fast_food')) {
-      categories += 'catering.fast_food,';
+    if (selectedCategories.includes("fast_food")) {
+      categories += "catering.fast_food,"
     }
 
-    categories = categories.replace(/,$/, '');
+    categories = categories.replace(/,$/, "")
 
-    const lat = latitude !== null ? parseFloat(latitude).toFixed(6) : 
-      currentLocation && currentLocation.coords.latitude ?
-      parseFloat(currentLocation.coords.latitude).toFixed(6) : 0.0;
+    const lat =
+      latitude !== null
+        ? parseFloat(latitude).toFixed(6)
+        : currentLocation && currentLocation.coords.latitude
+        ? parseFloat(currentLocation.coords.latitude).toFixed(6)
+        : 0.0
 
-    const lon = longitude !== null ? parseFloat(longitude).toFixed(6) :
-      currentLocation && currentLocation.coords.longitude ?
-      parseFloat(currentLocation.coords.longitude).toFixed(6) : 0.0;
+    const lon =
+      longitude !== null
+        ? parseFloat(longitude).toFixed(6)
+        : currentLocation && currentLocation.coords.longitude
+        ? parseFloat(currentLocation.coords.longitude).toFixed(6)
+        : 0.0
 
-
-    const url = `https://api.geoapify.com/v2/places?categories=${categories}&filter=circle:${lon},${lat},${radius}&bias=proximity:${lon},${lat}&limit=10&apiKey=54e1a62e66a34d32a0f17b1de7af1121`;
+    const url = `https://api.geoapify.com/v2/places?categories=${categories}&filter=circle:${lon},${lat},${radius}&bias=proximity:${lon},${lat}&limit=10&apiKey=54e1a62e66a34d32a0f17b1de7af1121`
     // const url = `https://api.geoapify.com/v2/places?categories=${categories}&filter=circle:,${radius}&bias=proximity:&limit=10&apiKey=54e1a62e66a34d32a0f17b1de7af1121`
-    return url;
-  };
-
+    return url
+  }
 
   useEffect(() => {
-    const lat = currentLocation && currentLocation.coords.latitude ?
-    parseFloat(currentLocation.coords.latitude).toFixed(6) : 0.0;
+    const lat =
+      currentLocation && currentLocation.coords.latitude
+        ? parseFloat(currentLocation.coords.latitude).toFixed(6)
+        : 0.0
 
-    const lon = currentLocation && currentLocation.coords.longitude ?
-      parseFloat(currentLocation.coords.longitude).toFixed(6) : 0.0;
+    const lon =
+      currentLocation && currentLocation.coords.longitude
+        ? parseFloat(currentLocation.coords.longitude).toFixed(6)
+        : 0.0
 
-
-    fetch(`https://api.geoapify.com/v2/places?categories=catering.restaurant,catering.fast_food&filter=circle:${lon},${lat},1000&bias=proximity:${lon},${lat}&limit=20&apiKey=54e1a62e66a34d32a0f17b1de7af1121`, requestOptions)
-      .then(response => response.json())
-      .then(data => {
+    fetch(
+      `https://api.geoapify.com/v2/places?categories=catering.restaurant,catering.fast_food&filter=circle:${lon},${lat},1000&bias=proximity:${lon},${lat}&limit=20&apiKey=54e1a62e66a34d32a0f17b1de7af1121`,
+      requestOptions
+    )
+      .then((response) => response.json())
+      .then((data) => {
         console.log(data.features)
         setPopular(data.features.slice(0, 5))
         setTodaysPick(data.features[randomNum])
       })
-      .catch(error => {
-        console.log('error', error)
-      });
+      .catch((error) => {
+        console.log("error", error)
+      })
 
     const url = generateUrl()
 
     fetch(url, requestOptions)
-      .then(response => response.json())
-      .then(data => {
+      .then((response) => response.json())
+      .then((data) => {
         setTopPicks(data.features)
       })
-      .catch(error => {
-        console.log('error', error)
-      });
-  }, [radius, selectedCategories, latitude, longitude, address, currentLocation])
+      .catch((error) => {
+        console.log("error", error)
+      })
+  }, [
+    radius,
+    selectedCategories,
+    latitude,
+    longitude,
+    address,
+    currentLocation,
+  ])
 
-
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false)
 
   const toggleModal = () => {
-    setIsModalVisible(!isModalVisible);
-  };
-
+    setIsModalVisible(!isModalVisible)
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -198,8 +210,6 @@ const Dashboard = () => {
             latitude: userData.location.coords.latitude,
           })
 
-
-
           const { name, postalCode } = reverseGeocodedAddress[0]
           setStreet(name)
           setPcode(postalCode)
@@ -214,16 +224,17 @@ const Dashboard = () => {
     fetchData()
   }, [])
 
-
   return (
     <View style={styles.container}>
-
       <Text style={{ fontSize: 26 }}>Hello, {user.firstName}</Text>
       <View style={styles.locationContainer}>
-        <TouchableOpacity
-          onPress={() => clearAddress()}
-        >
-          <Feather style={{ margin: 3 }} name="map-pin" size={20} color="blue" />
+        <TouchableOpacity onPress={() => clearAddress()}>
+          <Feather
+            style={{ margin: 3 }}
+            name="map-pin"
+            size={20}
+            color="blue"
+          />
         </TouchableOpacity>
         <TextInput
           ref={textInputRef}
@@ -234,54 +245,68 @@ const Dashboard = () => {
           placeholder={`${street}, ${pCode}`}
           onChangeText={setAddr}
         />
-        <TouchableOpacity 
-          onPress={() => setAddress(addr)}
-        >
-          <Feather style={{ margin: 3 }} name="search" size={20} color="black" />
+        <TouchableOpacity onPress={() => setAddress(addr)}>
+          <Feather
+            style={{ margin: 3 }}
+            name="search"
+            size={20}
+            color="black"
+          />
         </TouchableOpacity>
       </View>
       <TouchableOpacity onPress={toggleModal} style={styles.openModalButton}>
         <Text style={styles.openModalButtonText}>Filters</Text>
       </TouchableOpacity>
       <ScrollView>
-        <Text style={{ fontWeight: "bold" }}>Today's Pick</Text>
+        <Text style={{ fontWeight: "bold", marginBottom: 5 }}>
+          Today's Pick
+        </Text>
         <View>
           <View>
             <TouchableOpacity
-              onPress={() => navigation.navigate("Restaurant", { rest: todaysPick })}
+              onPress={() =>
+                navigation.navigate("Restaurant", { rest: todaysPick })
+              }
             >
               {todaysPick ? (
                 <View style={styles.card}>
-                  <Text>{todaysPick.properties.name}</Text>
-                  <Text>{todaysPick.properties.distance} meters</Text>
+                  <Text style={{ color: "white", fontWeight: "bold" }}>
+                    {todaysPick.properties.name}
+                  </Text>
+                  <Text style={{ color: "white" }}>
+                    {todaysPick.properties.distance} meters away
+                  </Text>
                 </View>
               ) : (
                 <Text>Loading...</Text>
               )}
             </TouchableOpacity>
           </View>
-
         </View>
         <View>
           <Text style={{ fontWeight: "bold" }}>Popular Restaurants</Text>
-          <Text>Check out what people around you have been trying:</Text>
-          <ScrollView vertical>
-            {
-              Object.values(popular).map((restaurant, index) => (
-                <View key={index}>
-                  <TouchableOpacity
-                    onPress={() => navigation.navigate("Restaurant", { rest: restaurant })}
-                  >
-
-
-                    <View style={styles.card}>
-                      <Text>{restaurant.properties.name}</Text>
-                      <Text>{restaurant.properties.distance} meters</Text>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              ))
-            }
+          <Text style={{ marginBottom: 5 }}>
+            Check out what people around you have been trying:
+          </Text>
+          <ScrollView vertical style={{ width: "100%" }}>
+            {Object.values(popular).map((restaurant, index) => (
+              <View key={index}>
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.navigate("Restaurant", { rest: restaurant })
+                  }
+                >
+                  <View style={styles.card}>
+                    <Text style={{ color: "white", fontWeight: "bold" }}>
+                      {restaurant.properties.name}
+                    </Text>
+                    <Text style={{ color: "white" }}>
+                      {restaurant.properties.distance} meters away
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            ))}
           </ScrollView>
         </View>
 
@@ -290,25 +315,39 @@ const Dashboard = () => {
           transparent={true}
           visible={isModalVisible}
           onRequestClose={() => {
-            toggleModal();
+            toggleModal()
           }}
         >
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <Text>Choose Radius:</Text>
+              <Text
+                style={{ marginTop: 10, marginBottom: 10, fontWeight: "bold" }}
+              >
+                Choose Radius (feet):
+              </Text>
               <TextInput
-                style={{ borderWidth: 1, borderColor: 'gray', margin: 10, padding: 5 }}
+                style={{
+                  borderWidth: 1,
+                  borderColor: "gray",
+                  margin: 10,
+                  padding: 5,
+                }}
                 placeholder="Enter radius"
+                keyboardType="number-pad"
                 value={radius}
                 onChangeText={(text) => setRadius(text)}
               />
 
-              <Text>Choose Restaurant Type:</Text>
+              <Text
+                style={{ marginTop: 10, marginBottom: 10, fontWeight: "bold" }}
+              >
+                Choose Restaurant Type:
+              </Text>
               <TouchableOpacity
-                onPress={() => toggleCategory('restaurant')}
+                onPress={() => toggleCategory("restaurant")}
                 style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
+                  flexDirection: "row",
+                  alignItems: "center",
                   marginBottom: 10,
                 }}
               >
@@ -318,18 +357,20 @@ const Dashboard = () => {
                     width: 24,
                     borderRadius: 12,
                     borderWidth: 2,
-                    borderColor: selectedCategories.includes('restaurant') ? 'blue' : 'black',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    borderColor: selectedCategories.includes("restaurant")
+                      ? "blue"
+                      : "black",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  {selectedCategories.includes('restaurant') && (
+                  {selectedCategories.includes("restaurant") && (
                     <View
                       style={{
                         height: 12,
                         width: 12,
                         borderRadius: 6,
-                        backgroundColor: 'blue',
+                        backgroundColor: "blue",
                       }}
                     />
                   )}
@@ -338,10 +379,10 @@ const Dashboard = () => {
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={() => toggleCategory('fast_food')}
+                onPress={() => toggleCategory("fast_food")}
                 style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
+                  flexDirection: "row",
+                  alignItems: "center",
                   marginBottom: 10,
                 }}
               >
@@ -351,59 +392,65 @@ const Dashboard = () => {
                     width: 24,
                     borderRadius: 12,
                     borderWidth: 2,
-                    borderColor: selectedCategories.includes('fast_food') ? 'blue' : 'black',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    borderColor: selectedCategories.includes("fast_food")
+                      ? "blue"
+                      : "black",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  {selectedCategories.includes('fast_food') && (
+                  {selectedCategories.includes("fast_food") && (
                     <View
                       style={{
                         height: 12,
                         width: 12,
                         borderRadius: 6,
-                        backgroundColor: 'blue',
+                        backgroundColor: "blue",
                       }}
                     />
                   )}
                 </View>
                 <Text style={{ marginLeft: 10 }}>Fast Food</Text>
               </TouchableOpacity>
-              <Button title="Close" onPress={toggleModal} />
+              <TouchableOpacity style={styles.openModalButton}>
+                <Text style={styles.openModalButtonText} onPress={toggleModal}>
+                  See Results
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
         </Modal>
 
         <View>
-          <Text style={{ fontWeight: "bold" }}>Top picks based on your preferences:</Text>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', }}>
+          <Text style={{ fontWeight: "bold" }}>
+            Top picks based on your preferences:
+          </Text>
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
             <ScrollView vertical>
-              {
-                topPick !== undefined ? (
-                  Object.values(topPick).map((restaurant, index) => (
-                    <View key={index}>
-                      <TouchableOpacity
-                        onPress={() => navigation.navigate("Restaurant", { rest: restaurant })}
-                      >
-
-
-                        <View style={styles.card}>
-                          <Text>{restaurant.properties.name}</Text>
-                          <Text>{restaurant.properties.distance} meters</Text>
-                        </View>
-                      </TouchableOpacity>
-                    </View>
-                  ))
-                ) : (
-                  <Text>Please expand search criteria</Text>
-                )
-              }
+              {topPick !== undefined ? (
+                Object.values(topPick).map((restaurant, index) => (
+                  <View key={index}>
+                    <TouchableOpacity
+                      onPress={() =>
+                        navigation.navigate("Restaurant", { rest: restaurant })
+                      }
+                    >
+                      <View style={styles.card}>
+                        <Text>{restaurant.properties.name}</Text>
+                        <Text>{restaurant.properties.distance} meters</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                ))
+              ) : (
+                <Text>Please expand search criteria</Text>
+              )}
             </ScrollView>
           </View>
-
         </View>
       </ScrollView>
-
     </View>
   )
 }
@@ -430,9 +477,17 @@ const styles = StyleSheet.create({
   card: {
     padding: 16,
     elevation: 5,
+    flex: 1,
     borderRadius: 10,
-    backgroundColor: 'grey',
-    margin: 5
+    borderWidth: 1,
+    backgroundColor: "#232b2b",
+    bordercolor: "#ddd",
+    elevation: 2, // Add elevation for Android shadows
+    shadowColor: "#414a4c", // Add shadow for iOS shadows
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    margin: 5,
   },
   modalContainer: {
     flex: 1,
@@ -447,19 +502,19 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   openModalButton: {
-    backgroundColor: "blue",
+    backgroundColor: "#ddd",
     padding: 10,
     borderRadius: 5,
     marginTop: 20,
     alignItems: "center",
-    marginBottom: 10
+    marginBottom: 10,
   },
   openModalButtonText: {
-    color: "#fff",
+    color: "black",
     fontSize: 16,
   },
   checkbox: {
-    alignSelf: 'center',
+    alignSelf: "center",
   },
 })
 

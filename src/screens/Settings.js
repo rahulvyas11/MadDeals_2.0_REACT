@@ -1,27 +1,64 @@
-//import { View, Text } from "react-native"
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react"
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native"
 import { useNavigation } from "@react-navigation/native"
+import firebase from "firebase/compat"
 
-import { View, Text, Button } from 'react-native';
+const Settings = () => {
+  const navigation = useNavigation()
 
-const Settings = ({ navigation }) => {
-  //const navigation = useNavigation()
+  const navigateToProfile = () => {
+    navigation.navigate("Profile")
+  }
+
+  const navigateToOtherSettings = () => {
+    navigation.navigate("OtherSettings")
+  }
 
   return (
-    <View>
+    <View style={styles.container}>
+      {/* Profile Card */}
+      <TouchableOpacity style={styles.card} onPress={navigateToProfile}>
+        <Text style={styles.cardText}>Profile</Text>
+      </TouchableOpacity>
 
-      {/* List of Pages */}
-      <Button
-        title="Profile"
-        onPress={() => navigation.navigate("Profile")}
-      />
-      <Button
-        title="Other Settings"
-        onPress={() => navigation.navigate("OtherSettings")}
-      />
+      {/* Other Settings Card */}
+      <TouchableOpacity style={styles.card} onPress={navigateToOtherSettings}>
+        <Text style={styles.cardText}>Other Settings</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => navigation.navigate("ChangePassword")}
+      >
+        <Text style={styles.cardText}>Reset Password</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => firebase.auth().signOut()}
+      >
+        <Text style={styles.cardText}>Sign Out</Text>
+      </TouchableOpacity>
     </View>
-  );
-};
+  )
+}
 
-export default Settings;
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+  },
+  card: {
+    backgroundColor: "white",
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 16,
+    elevation: 2, // Add elevation for Android shadows
+    shadowColor: "#000", // Add shadow for iOS shadows
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  cardText: {
+    fontSize: 15,
+  },
+})
+
+export default Settings
