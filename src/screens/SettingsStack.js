@@ -12,7 +12,7 @@ export default function NavigateStack() {
         <Stack.Navigator>
             <Stack.Screen name = "Setting " component = {Settings} />
             <Stack.Screen name="Profile" component={Profile}/>
-            <Stack.Screen name="Other Settings" component={OtherSettings}/>
+            {/* <Stack.Screen name="Other Settings" component={OtherSettings}/> */}
             <Stack.Screen name="Reset Password" component={ChangePassword}/>
         </Stack.Navigator>
     );

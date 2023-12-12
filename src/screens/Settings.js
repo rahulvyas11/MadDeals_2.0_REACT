@@ -22,9 +22,9 @@ const Settings = () => {
       </TouchableOpacity>
 
       {/* Other Settings Card */}
-      <TouchableOpacity style={styles.card} onPress={navigateToOtherSettings}>
+      {/* <TouchableOpacity style={styles.card} onPress={navigateToOtherSettings}>
         <Text style={styles.cardText}>Other Settings</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       <TouchableOpacity
         style={styles.card}
         onPress={() => navigation.navigate("Reset Password")}
