@@ -31,31 +31,44 @@ const Profile = ({ navigation }) => {
     const { firstName, lastName, email } = user;
     const currentUser = firebase.auth().currentUser;
     const uid = currentUser.uid;
-
-    currentUser.updateEmail(email).then(() => {
-      Alert.alert("Success", "Email updated successfully.")
-    })
-    .catch((error) => {
-      Alert.alert("Error", error.message)
-    })
-
-
-    firebase.firestore()
-      .collection('users')
-      .doc(uid)
-      .update({
-        'firstName' : firstName,
-        'lastName' : lastName,
-        'email' : email,
+  
+    const updateEmailPromise = email !== '' ? currentUser.updateEmail(email) : Promise.resolve();
+    // If email is not empty, update it; otherwise, resolve immediately
+  
+    updateEmailPromise
+      .then(() => {
+        if (email !== '') {
+          Alert.alert('Success', 'Email updated successfully.');
+        }
+  
+        // Update Firestore document only if the fields are not empty
+        const updateData = {};
+        if (firstName !== '') {
+          updateData.firstName = firstName;
+        }
+        if (lastName !== '') {
+          updateData.lastName = lastName;
+        }
+        if (email !== '') {
+          updateData.email = email;
+        }
+  
+        return firebase.firestore()
+          .collection('users')
+          .doc(uid)
+          .update(updateData);
       })
       .then(() => {
         console.log('Profile updated successfully');
       })
       .catch((error) => {
         console.error('Error updating profile:', error);
+        if (email !== '') {
+          Alert.alert('Error', error.message);
+        }
       });
-
   };
+  
 
 
 
