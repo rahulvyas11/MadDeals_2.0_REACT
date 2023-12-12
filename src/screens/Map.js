@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, TouchableOpacity } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import * as Location from 'expo-location';
 
@@ -11,6 +11,8 @@ const MapScreen = (props) => {
   const [name, setName] = useState('');
   const [polylineCoordinates, setPolylineCoordinates] = useState([]);
   const [popular, setPopular] = useState([])
+  const [zoomLevel, setZoomLevel] = useState(12);
+  const [mapRef, setMapRef] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,7 +45,6 @@ const MapScreen = (props) => {
     fetchData();
   }, [props.route]);
 
-
   useEffect(() => {
     if (location && secLat !== null && secLon !== null) {
       setPolylineCoordinates([
@@ -59,6 +60,34 @@ const MapScreen = (props) => {
     }
   }, [location, secLat, secLon]);
 
+  const handleZoomOut = () => {
+    if (mapRef) {
+      const newZoomLevel = zoomLevel + 1;
+      setZoomLevel(newZoomLevel);
+      const newRegion = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.0922 / Math.pow(2, 12 - newZoomLevel),
+        longitudeDelta: 0.0421 / Math.pow(2, 12 - newZoomLevel),
+      };
+      mapRef.animateToRegion(newRegion, 500); // Adjust the duration as needed
+    }
+  };
+  
+  const handleZoomIn = () => {
+    if (mapRef && zoomLevel > 0) {
+      const newZoomLevel = zoomLevel - 1;
+      setZoomLevel(newZoomLevel);
+      const newRegion = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.0922 / Math.pow(2, 12 - newZoomLevel),
+        longitudeDelta: 0.0421 / Math.pow(2, 12 - newZoomLevel),
+      };
+      mapRef.animateToRegion(newRegion, 500); // Adjust the duration as needed
+    }
+  };
+
   return (
     <View style={styles.container}>
       {location ? (
@@ -67,10 +96,11 @@ const MapScreen = (props) => {
           initialRegion={{
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
+            latitudeDelta: 0.0922 / Math.pow(2, 12 - zoomLevel),
+            longitudeDelta: 0.0421 / Math.pow(2, 12 - zoomLevel),
           }}
           provider={MapView.PROVIDER_DEFAULT}
+          ref={(ref) => setMapRef(ref)}
         >
           <Marker
             coordinate={{
@@ -114,6 +144,12 @@ const MapScreen = (props) => {
       ) : (
         <Text>Loading...</Text>
       )}
+      <TouchableOpacity style={styles.zoomInButton} onPress={handleZoomIn}>
+        <Text>+</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.zoomOutButton} onPress={handleZoomOut}>
+        <Text>-</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -127,6 +163,22 @@ const styles = StyleSheet.create({
   map: {
     width: Dimensions.get('window').width,
     height: Dimensions.get('window').height,
+  },
+  zoomInButton: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    backgroundColor: 'white',
+    borderRadius: 5,
+    padding: 10,
+  },
+  zoomOutButton: {
+    position: 'absolute',
+    top: 70,
+    right: 20,
+    backgroundColor: 'white',
+    borderRadius: 5,
+    padding: 10,
   },
 });
 
