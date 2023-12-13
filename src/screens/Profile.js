@@ -1,77 +1,82 @@
-import { React, useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, Button } from 'react-native';
+import { React, useState, useEffect } from "react"
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  StyleSheet,
+  Button,
+} from "react-native"
 import { useNavigation } from "@react-navigation/native"
 import { firebase } from "../../config"
-import { Alert } from 'react-native';
+import { Alert } from "react-native"
 
 const Profile = ({ navigation }) => {
   const [user, setUser] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-  });
+    firstName: "",
+    lastName: "",
+    email: "",
+  })
   const handlePress = (field) => {
     // Handle the press event for each field as needed
-    console.log(`Pressed ${field}`);
-  };
-
+    console.log(`Pressed ${field}`)
+  }
 
   const handleFirstNameChange = (text) => {
-    setUser({ ...user, firstName: text });
-  };
+    setUser({ ...user, firstName: text })
+  }
 
   const handleLastNameChange = (text) => {
-    setUser({ ...user, lastName: text });
-  };
+    setUser({ ...user, lastName: text })
+  }
 
   const handleEmailChange = (text) => {
-    setUser({ ...user, email: text });
-  };
+    setUser({ ...user, email: text })
+  }
 
   const update = () => {
-    const { firstName, lastName, email } = user;
-    const currentUser = firebase.auth().currentUser;
-    const uid = currentUser.uid;
-  
-    const updateEmailPromise = email !== '' ? currentUser.updateEmail(email) : Promise.resolve();
+    const { firstName, lastName, email } = user
+    const currentUser = firebase.auth().currentUser
+    const uid = currentUser.uid
+
+    const updateEmailPromise =
+      email !== "" ? currentUser.updateEmail(email) : Promise.resolve()
     // If email is not empty, update it; otherwise, resolve immediately
-  
+
     updateEmailPromise
       .then(() => {
-        if (email !== '') {
-          Alert.alert('Success', 'Email updated successfully.');
+        if (email !== "") {
+          Alert.alert("Success", "Email updated successfully.")
         }
-  
+
         // Update Firestore document only if the fields are not empty
-        const updateData = {};
-        if (firstName !== '') {
-          updateData.firstName = firstName;
+        const updateData = {}
+        if (firstName !== "") {
+          updateData.firstName = firstName
         }
-        if (lastName !== '') {
-          updateData.lastName = lastName;
+        if (lastName !== "") {
+          updateData.lastName = lastName
         }
-        if (email !== '') {
-          updateData.email = email;
+        if (email !== "") {
+          updateData.email = email
         }
-  
-        return firebase.firestore()
-          .collection('users')
+
+        return firebase
+          .firestore()
+          .collection("users")
           .doc(uid)
-          .update(updateData);
+          .update(updateData)
       })
       .then(() => {
         Alert.alert("Success", "Profile updated successfully")
       })
       .catch((error) => {
-        console.error('Error updating profile:', error);
-        if (email !== '') {
-          Alert.alert('Error', error.message);
+        console.error("Error updating profile:", error)
+        if (email !== "") {
+          Alert.alert("Error", error.message)
         }
-      });
-  };
-  
-
-
+      })
+  }
 
   console.log(firebase.auth().currentUser)
 
@@ -103,7 +108,7 @@ const Profile = ({ navigation }) => {
         <Text style={styles.bubbleTitle}>Email</Text>
         <TextInput
           style={styles.profileItem}
-          placeholder="johndoe@example.com"
+          placeholder="johndoe@gmail.com"
           onChangeText={handleEmailChange}
           value={user.email}
         />
@@ -157,12 +162,15 @@ const Profile = ({ navigation }) => {
       </View> */}
 
       <View style={styles.centeredButton}>
-        <Button title="Change Password" onPress={() => navigation.navigate("Reset Password")} />
+        <Button
+          title="Change Password"
+          onPress={() => navigation.navigate("Reset Password")}
+        />
         <Button title="Update" onPress={() => update()} />
       </View>
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -170,12 +178,12 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 20,
   },
   bubbleContainer: {
-    alignItems: 'flex-start',
+    alignItems: "flex-start",
     marginBottom: 20,
   },
   bubbleTitle: {
@@ -183,26 +191,25 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   profileItem: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 10,
     padding: 10,
-    width: '100%',
+    width: "100%",
   },
   addressContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   addressItem: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 10,
     padding: 10,
-    width: '100%',
+    width: "100%",
     marginRight: 5,
   },
   centeredButton: {
-    alignItems: 'center',
+    alignItems: "center",
   },
-});
+})
 
-export default Profile;
-
+export default Profile

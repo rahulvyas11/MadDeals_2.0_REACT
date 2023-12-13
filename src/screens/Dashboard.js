@@ -35,9 +35,11 @@ const Dashboard = () => {
   const [addr, setAddr] = useState("")
   const [currentLocation, setCurrentLocation] = useState(null)
   const [todaysPick, setTodaysPick] = useState(null)
-  const [selectedCategories, setSelectedCategories] = useState([ "restaurant, fast_food"])
+  const [selectedCategories, setSelectedCategories] = useState([
+    "restaurant, fast_food",
+  ])
   const [isModalVisible, setIsModalVisible] = useState(false)
-  const [deals, setDeals] = useState([]);
+  const [deals, setDeals] = useState([])
 
   // Takes the users current location
   useEffect(() => {
@@ -75,7 +77,7 @@ const Dashboard = () => {
     addressToCoordinates()
   }, [address])
 
-  // Reinitialize fields 
+  // Reinitialize fields
   const clearAddress = () => {
     setLatitude(null)
     setLongitude(null)
@@ -89,7 +91,6 @@ const Dashboard = () => {
   const dayOfMonth = currentDate.getDate()
   const randomNum = (dayOfMonth % 10) + 6
 
-  
   // Toggles categories based on users choice
   const toggleCategory = (category) => {
     if (selectedCategories.includes(category)) {
@@ -100,7 +101,6 @@ const Dashboard = () => {
       setSelectedCategories([...selectedCategories, category])
     }
   }
-
 
   var requestOptions = {
     method: "GET",
@@ -191,6 +191,20 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        let LOCATION = await Location.getCurrentPositionAsync({})
+
+        let LATITUDE =
+          LOCATION && LOCATION.coords.latitude
+            ? parseFloat(LOCATION.coords.latitude).toFixed(6)
+            : 0.0
+
+        let LONGITUDE =
+          LOCATION && LOCATION.coords.longitude
+            ? parseFloat(LOCATION.coords.longitude).toFixed(6)
+            : 0.0
+
+        console.log("Latitude", LATITUDE)
+
         const userSnapshot = await firebase
           .firestore()
           .collection("users")
@@ -200,10 +214,10 @@ const Dashboard = () => {
         if (userSnapshot.exists) {
           const userData = userSnapshot.data()
           setUser(userData)
-
+          console.log("Current Location", LOCATION)
           const reverseGeocodedAddress = await Location.reverseGeocodeAsync({
-            longitude: userData.location.coords.longitude,
-            latitude: userData.location.coords.latitude,
+            longitude: parseFloat(LONGITUDE),
+            latitude: parseFloat(LATITUDE),
           })
 
           const { name, postalCode } = reverseGeocodedAddress[0]
@@ -231,7 +245,7 @@ const Dashboard = () => {
   //           longitude,
   //         },
   //       });
-    
+
   //       const deals = response.data;
   //       console.log(deals);
   //     } catch (error) {
@@ -291,15 +305,8 @@ const Dashboard = () => {
           placeholder={`${street}, ${pCode}`}
           onChangeText={setAddr}
         />
-        <TouchableOpacity onPress={() => setAddress(addr)}>
-          <Feather
-            style={{ margin: 3 }}
-            name="search"
-            size={20}
-            color="black"
-          />
-        </TouchableOpacity>
       </View>
+
       <TouchableOpacity onPress={toggleModal} style={styles.openModalButton}>
         <Text style={styles.openModalButtonText}>Filters</Text>
       </TouchableOpacity>
@@ -484,8 +491,12 @@ const Dashboard = () => {
                       }
                     >
                       <View style={styles.card}>
-                        <Text style={{ color: "white", fontWeight: "bold" }}>{restaurant.properties.name}</Text>
-                        <Text style={{ color: "white" }}>{restaurant.properties.distance} meters</Text>
+                        <Text style={{ color: "white", fontWeight: "bold" }}>
+                          {restaurant.properties.name}
+                        </Text>
+                        <Text style={{ color: "white" }}>
+                          {restaurant.properties.distance} meters
+                        </Text>
                       </View>
                     </TouchableOpacity>
                   </View>
@@ -496,7 +507,7 @@ const Dashboard = () => {
             </ScrollView>
           </View>
         </View>
-        
+
         {/* Coupon display logic - Not properly functioning */}
         <View>
           <Text style={{ fontWeight: "bold" }}>
@@ -506,12 +517,10 @@ const Dashboard = () => {
             {deals.map((deal, index) => (
               <TouchableOpacity
                 key={index}
-                onPress={() =>
-                  navigation.navigate("Deals", { rest: deal })
-                }
+                onPress={() => navigation.navigate("Deals", { rest: deal })}
               >
                 <View style={styles.card}>
-                  <Text style={{ color: 'white', fontWeight: 'bold' }}>
+                  <Text style={{ color: "white", fontWeight: "bold" }}>
                     {deal.title}
                   </Text>
                 </View>
@@ -519,7 +528,6 @@ const Dashboard = () => {
             ))}
           </ScrollView>
         </View>
-
       </ScrollView>
     </View>
   )
@@ -529,8 +537,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    justifyContent: "flex-start", 
-    paddingTop: 20, 
+    justifyContent: "flex-start",
+    paddingTop: 20,
     alignItems: "center",
     justifyContent: "flex-start",
     paddingTop: 20,
@@ -551,8 +559,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     backgroundColor: "#232b2b",
     bordercolor: "#ddd",
-    elevation: 2, 
-    shadowColor: "#414a4c", 
+    elevation: 2,
+    shadowColor: "#414a4c",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
@@ -587,4 +595,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default Dashboard;
+export default Dashboard
